@@ -41,8 +41,14 @@ jobs:
       - name: Build APK
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
         run: |
-          eas init --force --non-interactive
+          if [ -z "$EAS_PROJECT_ID" ]; then
+            echo "Missing GitHub secret EAS_PROJECT_ID."
+            echo "Create/link the QRY-PTI project in Expo first, then add its project ID as EAS_PROJECT_ID."
+            exit 1
+          fi
+          eas init --id "$EAS_PROJECT_ID" --force --non-interactive
           eas build --platform android --profile preview --non-interactive
 
       - name: Build instructions
