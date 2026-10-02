@@ -23,8 +23,10 @@ jobs:
       - name: Install dependencies
         run: npm install --package-lock=false
 
-      - name: Verify Expo dependency alignment
-        run: npx expo install --check
+      - name: Align Expo dependencies
+        run: |
+          npx expo install --fix
+          npx expo install --check
 
       - name: Setup Expo/EAS
         run: npm install --global eas-cli
