@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "QRY-PTI",
+    "slug": "qrypti",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.qrypti.browser",
+      "versionCode": 1,
+      "usesCleartextTraffic": false
+    },
+    "plugins": [
+      "react-native-webview"
+    ]
+  }
+}
