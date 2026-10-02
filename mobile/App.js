@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
+  Linking,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -11,19 +12,47 @@ import {
   View,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
+import * as ScreenCapture from "expo-screen-capture";
 import { WebView } from "react-native-webview";
 
 const HOME_URL = "https://www.google.com";
-const API_URL = "http://localhost:5000";
+
+const TRACKER_HOSTS = [
+  "google-analytics.com",
+  "googletagmanager.com",
+  "doubleclick.net",
+  "googlesyndication.com",
+  "adservice.google.com",
+  "connect.facebook.net",
+  "hotjar.com",
+  "clarity.ms",
+  "segment.io",
+  "mixpanel.com",
+];
 
 function normalizeUrl(value) {
   const input = value.trim();
   if (!input) return HOME_URL;
 
   try {
-    return new URL(input).href;
+    const parsed = new URL(input);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.href;
+    }
+  } catch {}
+
+  return `https://www.google.com/search?q=${encodeURIComponent(input)}`;
+}
+
+function isTracker(url) {
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    return TRACKER_HOSTS.some(
+      (host) => hostname === host || hostname.endsWith(`.${host}`)
+    );
   } catch {
-    return `https://www.google.com/search?q=${encodeURIComponent(input)}`;
+    return false;
   }
 }
 
@@ -38,13 +67,29 @@ export default function App() {
     blockTrackers: true,
     blockThirdPartyCookies: true,
     fingerprintProtection: true,
+    screenProtection: true,
   });
 
   useEffect(() => {
     AsyncStorage.getItem("qrypti_privacy").then((saved) => {
-      if (saved) setPrivacy(JSON.parse(saved));
+      if (saved) setPrivacy({ ...privacy, ...JSON.parse(saved) });
     });
   }, []);
+
+  useEffect(() => {
+    const applyScreenProtection = async () => {
+      if (privacy.screenProtection) {
+        await ScreenCapture.preventScreenCaptureAsync("qrypti");
+      } else {
+        await ScreenCapture.allowScreenCaptureAsync("qrypti");
+      }
+    };
+
+    applyScreenProtection().catch(() => {});
+    return () => {
+      ScreenCapture.allowScreenCaptureAsync("qrypti").catch(() => {});
+    };
+  }, [privacy.screenProtection]);
 
   useEffect(() => {
     const onBack = () => {
@@ -125,18 +170,21 @@ export default function App() {
       </View>
 
       <View style={styles.privacyBar}>
-        <Text style={styles.privacyTitle}>Privacy</Text>
+        <Text style={styles.privacyTitle}>Protection</Text>
         {[
           ["blockTrackers", "Trackers"],
           ["blockThirdPartyCookies", "3rd-party cookies"],
           ["fingerprintProtection", "Fingerprint"],
+          ["screenProtection", "Screen"],
         ].map(([key, label]) => (
           <TouchableOpacity
             key={key}
             style={[styles.pill, privacy[key] && styles.pillActive]}
             onPress={() => togglePrivacy(key)}
           >
-            <Text style={styles.pillText}>{privacy[key] ? "ON " : "OFF "}{label}</Text>
+            <Text style={styles.pillText}>
+              {privacy[key] ? "ON " : "OFF "}{label}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -147,6 +195,7 @@ export default function App() {
             <ActivityIndicator />
           </View>
         )}
+
         <WebView
           ref={webview}
           source={{ uri: url }}
@@ -158,13 +207,29 @@ export default function App() {
             setCanGoForward(state.canGoForward);
             addHistory(state.url);
           }}
+          onShouldStartLoadWithRequest={(request) => {
+            const requestUrl = request.url;
+
+            if (requestUrl.startsWith("http://") || requestUrl.startsWith("https://")) {
+              if (privacy.blockTrackers && isTracker(requestUrl)) {
+                return false;
+              }
+              return true;
+            }
+
+            Linking.openURL(requestUrl).catch(() => {});
+            return false;
+          }}
           javaScriptEnabled
           domStorageEnabled
-          thirdPartyCookiesEnabled={privacy.blockThirdPartyCookies ? false : true}
+          mediaPlaybackRequiresUserAction={false}
+          allowsFullscreenVideo
+          thirdPartyCookiesEnabled={!privacy.blockThirdPartyCookies}
           sharedCookiesEnabled={false}
           allowsBackForwardNavigationGestures
           startInLoadingState
           setSupportMultipleWindows={false}
+          mixedContentMode="never"
           style={styles.webview}
         />
       </View>
@@ -176,12 +241,14 @@ export default function App() {
         <TouchableOpacity onPress={() => webview.current?.reload()}>
           <Text style={styles.bottomText}>Reload</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {
-          AsyncStorage.getItem("qrypti_history").then((value) => {
-            const count = value ? JSON.parse(value).length : 0;
-            alert(`QRY-PTI history: ${count} saved pages`);
-          });
-        }}>
+        <TouchableOpacity
+          onPress={() =>
+            AsyncStorage.getItem("qrypti_history").then((value) => {
+              const count = value ? JSON.parse(value).length : 0;
+              alert(`QRY-PTI history: ${count} saved pages`);
+            })
+          }
+        >
           <Text style={styles.bottomText}>History</Text>
         </TouchableOpacity>
       </View>
