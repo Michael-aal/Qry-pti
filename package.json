@@ -1,20 +1,2 @@
 {
-  "name": "my-backend-project",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "express": "^5.2.1",
-    "joi": "^18.0.2",
-    "jsonwebtoken": "^9.0.3",
-    "mongodb": "^7.0.0"
-  }
-}
+  "name":"qrypti","version":"1.0.0","description":"Privacy-focused browser shell and SaaS foundation","main":"server.js","scripts":{"start":"node server.js","dev":"node server.js","test":"node --check server.js && node --check main.js && node --check login.js && node --check sign.js"},"keywords":["browser","privacy","security"],"license":"ISC","type":"commonjs","dependencies":{"bcrypt":"^6.0.0","dotenv":"^17.2.2","express":"^5.2.1","joi":"^18.0.2","jsonwebtoken":"^9.0.3","mongodb":"^7.0.0"}}
