@@ -11,7 +11,6 @@
       "usesCleartextTraffic": false
     },
     "plugins": [
-      "react-native-webview",
       "expo-screen-capture",
       "expo-secure-store"
     ]
