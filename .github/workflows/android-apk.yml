@@ -41,7 +41,9 @@ jobs:
       - name: Build APK
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas build --platform android --profile preview --non-interactive
+        run: |
+          eas init --force --non-interactive
+          eas build --platform android --profile preview --non-interactive
 
       - name: Build instructions
         run: echo "EAS submitted the APK build. Download the generated artifact from the Expo build page."
