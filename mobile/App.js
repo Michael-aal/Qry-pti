@@ -70,7 +70,7 @@ export default function App() {
   const removeBookmark=async(url)=>{const next=bookmarks.filter((b)=>b.url!==url);setBookmarks(next);await AsyncStorage.setItem("qrypti_bookmarks",JSON.stringify(next))};
   const addDownload=async(url)=>{const next=[{url,at:Date.now()},...downloads].slice(0,100);setDownloads(next);await AsyncStorage.setItem("qrypti_downloads",JSON.stringify(next));Linking.openURL(url).catch(()=>Alert.alert("Download","Android could not open the download."))};
   const setPermission=async(key)=>{const next={...permissions,[key]:!permissions[key]};setPermissions(next);await AsyncStorage.setItem("qrypti_permissions",JSON.stringify(next))};
-  const setSitePermission=async(key)=>{const current=sitePermissions[host]||{};const next={...sitePermissions,[host],};next[host]={...current,[key]:!current[key]};setSitePermissions(next);await AsyncStorage.setItem("qrypti_site_permissions",JSON.stringify(next))};
+  const setSitePermission=async(key)=>{const current=sitePermissions[host]||{};const next={...sitePermissions,[host]:{...current,[key]:!current[key]}};setSitePermissions(next);await AsyncStorage.setItem("qrypti_site_permissions",JSON.stringify(next))};
   const clearHistory=async()=>{setHistory([]);await AsyncStorage.removeItem("qrypti_history")};
   const clearData=async()=>{await clearHistory();setBookmarks([]);setDownloads([]);await AsyncStorage.multiRemove(["qrypti_bookmarks","qrypti_downloads"]);Alert.alert("Browser data","History, bookmarks and download records cleared.")};
 
