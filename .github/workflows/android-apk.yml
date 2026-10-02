@@ -26,6 +26,13 @@ jobs:
       - name: Setup Expo/EAS
         run: npm install --global eas-cli
 
+      - name: Validate Expo configuration
+        run: |
+          echo "--- eas.json ---"
+          cat eas.json
+          echo "--- Expo config ---"
+          npx expo config --json
+
       - name: Build APK
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
