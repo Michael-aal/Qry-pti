@@ -21,7 +21,10 @@ jobs:
           cache-dependency-path: mobile/package.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --package-lock=false
+
+      - name: Verify Expo dependency alignment
+        run: npx expo install --check
 
       - name: Setup Expo/EAS
         run: npm install --global eas-cli
@@ -31,7 +34,7 @@ jobs:
           echo "--- eas.json ---"
           cat eas.json
           echo "--- Expo config ---"
-          npx expo config --json
+          npx expo config --json --type public
 
       - name: Build APK
         env:
