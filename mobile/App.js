@@ -12,7 +12,6 @@ import {
   View,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
 import * as ScreenCapture from "expo-screen-capture";
 import { WebView } from "react-native-webview";
 
@@ -174,7 +173,7 @@ export default function App() {
         {[
           ["blockTrackers", "Trackers"],
           ["blockThirdPartyCookies", "3rd-party cookies"],
-          ["fingerprintProtection", "Fingerprint"],
+          ["fingerprintProtection", "Fingerprint*"],
           ["screenProtection", "Screen"],
         ].map(([key, label]) => (
           <TouchableOpacity
