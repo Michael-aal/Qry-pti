@@ -1,6 +1,2 @@
-// Signup
-fetch("http://localhost:5000/api/auth/signup", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ Username ,email, password })
-});
+const API=localStorage.getItem("qrypti_api_url")||window.QRYPTI_API_URL||"http://localhost:5000";const form=document.querySelector("form"),inputs=document.querySelectorAll(".input"),status=document.createElement("p");status.setAttribute("role","alert");form?.appendChild(status);
+async function Sign_up(e){e?.preventDefault();const username=inputs[0]?.value.trim(),email=inputs[1]?.value.trim(),password=inputs[2]?.value;if(!username||!email||!password){status.textContent="Complete all fields.";return false}try{status.textContent="Creating account…";const r=await fetch(API+"/api/auth/signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,email,password})}),d=await r.json();if(!r.ok)throw Error(d.error||"Signup failed");localStorage.setItem("qrypti_token",d.token);localStorage.setItem("qrypti_user",JSON.stringify(d.user));location.href="main.html"}catch(err){status.textContent=err.message}return false}form?.addEventListener("submit",Sign_up);

@@ -1,22 +1,2 @@
-// Login
-// fetch("http://localhost:5000/api/auth/login", {
-//   method: "POST",
-//   headers: { "Content-Type": "application/json" },
-//   body: JSON.stringify({ email, password })
-// });
-
-
-function Login(){
-  const email = document.querySelector(".email").value
-  const password = document.querySelector(".password").value
- console.log(email)
- console.log(password)
-  if ( email == "Trayghatorrison@gmail.com" && password == "12345"){
-      location.href = "main.html";
-
-      alert("correct!!")
-  }
-  else{
-   alert("Wrong password")
-  }
-}
+const API=localStorage.getItem("qrypti_api_url")||window.QRYPTI_API_URL||"http://localhost:5000";const form=document.querySelector("form");const status=document.createElement("p");status.setAttribute("role","alert");form?.appendChild(status);
+async function Login(e){e?.preventDefault();const email=document.querySelector(".email")?.value.trim(),password=document.querySelector(".password")?.value;if(!email||!password){status.textContent="Enter your email and password.";return false}try{status.textContent="Signing in…";const r=await fetch(API+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email,password})}),d=await r.json();if(!r.ok)throw Error(d.error||"Login failed");localStorage.setItem("qrypti_token",d.token);localStorage.setItem("qrypti_user",JSON.stringify(d.user));location.href="main.html"}catch(err){status.textContent=err.message}return false}form?.addEventListener("submit",Login);
